@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.MemberAddressDao">
+
+    <resultMap id="memberAddressMap" type="com.ns.warlock.dto.MemberAddressDTO" >
+        <id property="id" column="id"/>
+        <result property="memberId" column="member_id"/>
+        <result property="address" column="address"/>
+        <result property="zipCode" column="zipCode"/>
+        <result property="phone" column="phone"/>
+        <result property="name" column="name"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+
+    <select id="findAll" parameterType="java.lang.Long" resultMap="memberAddressMap">
+        select *
+        from ns_member_address
+        where 1=1
+        and member_id = #{id}
+        order by id ASC
+    </select>
+
+    <select id="find" parameterType="java.lang.Long" resultMap="memberAddressMap">
+        select *
+        from ns_member_address
+        where 1=1
+        and id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.ns.warlock.dto.MemberAddressDTO">
+        insert into ns_member_address
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="memberId != null">
+                member_id,
+            </if>
+            <if test="address != null">
+                address,
+            </if>
+            <if test="zipCode != null">
+                zipCode,
+            </if>
+            <if test="phone != null">
+                phone,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="memberId != null">
+                #{memberId},
+            </if>
+            <if test="address != null">
+                #{address},
+            </if>
+            <if test="zipCode != null">
+                #{zipCode},
+            </if>
+            <if test="phone != null">
+                #{phone},
+            </if>
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.ns.warlock.dto.MemberAddressDTO">
+        update ns_member_address
+        <set>
+            <if test="address != null">
+                address = #{address},
+            </if>
+            <if test="zipCode != null">
+                zipCode = #{zipCode},
+            </if>
+            <if test="phone != null">
+                phone = #{phone},
+            </if>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="updateDate != null">
+                update_date = #{updateDate},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="Long[]">
+        delete from ns_member_address where id IN
+        <foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

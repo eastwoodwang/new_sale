@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.ProductDao">
+
+    <resultMap id="productMap" type="com.ns.warlock.dto.ProductDTO" >
+        <id property="id" column="id"/>
+        <result property="sn" column="sn"/>
+        <result property="name" column="name"/>
+        <result property="price" column="price"/>
+        <result property="memberPrice" column="member_price"/>
+        <result property="displayImage" column="display_image"/>
+        <result property="stock" column="stock"/>
+        <result property="marketable" column="marketable"/>
+        <result property="allocateStock" column="allocate_stock"/>
+        <result property="createDate" column="create_date" />
+        <result property="updateDate" column="update_date" />
+    </resultMap>
+
+
+    <select id="findAll" parameterType="string" resultMap="productMap">
+        select *
+        from ns_product
+        where 1=1
+        <if test="marketable != null">
+           and marketable = #{marketable}
+        </if>
+        order by id ASC
+    </select>
+
+    <select id="find" parameterType="java.lang.Long" resultMap="productMap">
+        select *
+        from ns_product
+        where 1=1
+        and id = #{id}
+    </select>
+
+    <insert id="save" parameterType="com.ns.warlock.dto.ProductDTO" useGeneratedKeys="true" keyProperty="id">
+        insert into ns_product
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="sn != null">
+                sn,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="price != null">
+                price,
+            </if>
+            <if test="memberPrice != null">
+                member_price,
+            </if>
+            <if test="displayImage != null">
+                display_image,
+            </if>
+            <if test="stock != null">
+                stock,
+            </if>
+            <if test="marketable != null">
+                marketable,
+            </if>
+            <if test="allocateStock != null">
+                allocate_stock,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="sn != null">
+                #{sn},
+            </if>
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="price != null">
+                #{price},
+            </if>
+            <if test="memberPrice != null">
+                #{memberPrice},
+            </if>
+            <if test="displayImage != null">
+                #{displayImage},
+            </if>
+            <if test="stock != null">
+                #{stock},
+            </if>
+            <if test="marketable != null">
+                #{marketable},
+            </if>
+            <if test="allocateStock != null">
+                #{allocateStock},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.ns.warlock.dto.ProductDTO">
+        update ns_product
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <if test="memberPrice != null">
+                member_price = #{memberPrice},
+            </if>
+            <if test="displayImage != null">
+                display_image = #{displayImage},
+            </if>
+            <if test="stock != null">
+                stock = #{stock},
+            </if>
+            <if test="marketable != null">
+                marketable = #{marketable},
+            </if>
+            <if test="allocateStock != null">
+                allocate_stock = #{allocateStock},
+            </if>
+            <if test="updateDate != null">
+                update_date = #{updateDate},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="Long[]">
+        delete from ns_product where id IN
+        <foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <update id="batchToggleMarketable" parameterType="map">
+        update ns_product set marketable = #{marketable}, update_date = now() where marketable != #{marketable}
+        and id in
+        <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <update id="changeStock" parameterType="map">
+        update ns_product set allocate_stock = allocate_stock + #{quantity} where id = #{productId}
+    </update>
+
+</mapper>

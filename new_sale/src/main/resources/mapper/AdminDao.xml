@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.AdminDao">
+
+    <resultMap id="AdminMap" type="com.ns.warlock.dto.AdminDTO" >
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="salt" column="salt"/>
+        <result property="isLocked" column="is_locked"/>
+    </resultMap>
+
+
+    <select id="findByUsername" parameterType="String" resultMap="AdminMap">
+        SELECT * FROM ns_admin WHERE username = #{username}
+    </select>
+
+    <select id="findPermissions" parameterType="String" resultType="java.lang.String">
+        SELECT authority.authorities FROM ns_admin admin, ns_admin_role rela, ns_role_authority authority
+        WHERE 1=1
+        and admin.id = rela.admin_id
+        and rela.role_id = authority.role_id
+        and admin.username = #{username}
+   </select>
+
+    <select id="findRoles" parameterType="String" resultType="java.lang.String">
+        SELECT rela.role_id FROM ns_admin admin, ns_admin_role rela
+        WHERE 1=1
+        and admin.id = rela.admin_id
+        and admin.username = #{username}
+    </select>
+
+    <update id="updatePassword" parameterType="com.ns.warlock.dto.AdminDTO">
+        UPDATE ns_admin set password = #{password} where 1 = 1 and id = #{id}
+    </update>
+
+</mapper>

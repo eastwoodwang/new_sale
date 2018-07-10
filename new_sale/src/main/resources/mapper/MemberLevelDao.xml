@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.MemberLevelDao">
+
+    <resultMap id="memberLevelMap" type="com.ns.warlock.dto.MemberLevelDTO">
+        <id property="id" column="id"/>
+        <result property="levelName" column="level_name"/>
+        <result property="minRange" column="min_range"/>
+        <result property="maxRange" column="max_range"/>
+        <result property="priority" column="priority"/>
+        <result property="system" column="system"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="memberLevelMap">
+        select * from ns_member_level
+        where 1=1
+        and system != '1'
+        order by priority ASC
+    </select>
+
+    <select id="find" parameterType="java.lang.Long" resultMap="memberLevelMap">
+        select * from ns_member_level where id = #{id}
+    </select>
+
+    <select id="findInitLevel" resultType="string">
+        select id from ns_member_level where system = '0' order by priority ASC limit 1
+    </select>
+
+    <insert id="insert" parameterType="com.ns.warlock.dto.MemberLevelDTO">
+        insert into ns_member_level(level_name, min_range, max_range, priority)
+        values(#{levelName}, #{minRange}, #{maxRange}, #{priority})
+    </insert>
+
+    <update id="update" parameterType="com.ns.warlock.dto.MemberLevelDTO">
+        update ns_member_level
+        <set>
+            <if test="levelName != null">
+                level_name = #{levelName},
+            </if>
+            <if test="minRange != null">
+                min_range = #{minRange},
+            </if>
+            <if test="maxRange != null">
+                max_range = #{maxRange},
+            </if>
+            <if test="priority != null">
+                priority = #{priority},
+            </if>
+        </set>
+        where 1=1
+        and id = #{id}
+    </update>
+
+    <select id="selectPromptLevel" resultType="string">
+        select id from ns_member_level where orderPay BETWEEN min_range and max_range
+    </select>
+
+    <select id="checkMemberInLevel" parameterType="Long[]" resultType="string">
+        select id from ns_member where member_level in
+        <foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        limit 1
+    </select>
+
+    <delete id="delete" parameterType="Long[]">
+        delete from ns_member_level
+        where id IN
+        <foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="validateRange" resultType="string">
+        select id from ns_member_level
+        where #{range} BETWEEN min_range and max_range
+    </select>
+</mapper>

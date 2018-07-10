@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.SaleStatisDao">
+
+    <resultMap id="memberSaleMap" type="com.ns.warlock.dto.SaleStatisDTO">
+        <id property="id" column="id"/>
+        <result property="memberId" column="member_id"/>
+        <result property="month" column="month"/>
+        <result property="groupId" column="group_id"/>
+        <result property="rate" column="rate"/>
+        <result property="personSale" column="person_sale"/>
+        <result property="leafSale" column="leaf_sale" />
+        <result property="groupSale" column="group_sale"/>
+        <result property="saleGain" column="sale_gain"/>
+        <result property="leafSaleGain" column="leaf_sale_gain"/>
+        <result property="parentMemberId" column="parent_member_id" />
+        <result property="createDate" column="create_date"/>
+    </resultMap>
+
+
+    <select id="leafList" parameterType="map" resultMap="memberSaleMap">
+        select * from ns_sale_statis
+        where parent_member_id = #{memberId}
+    </select>
+
+    <select id="sumLeafList" parameterType="map" resultType="java.lang.Double">
+        select sum(sale_gain) from ns_sale_statis
+        where group_id = #{groupId}
+        and member_id != #{memberId}
+        and month = #{month}
+    </select>
+
+    <select id="findList" parameterType="string" resultMap="memberSaleMap">
+        select * from ns_sale_statis where member_id = #{memberId} GROUP by month
+    </select>
+
+    <update id="update" parameterType="com.ns.warlock.dto.SaleStatisDTO">
+        update ns_sale_statis
+        <set>
+            <if test="leafSaleGain != null">
+                leaf_sale_gain = #{leafSaleGain},
+            </if>
+            <if test="saleGain != null">
+                sale_gain = #{saleGain},
+            </if>
+        </set>
+        where id = #{id}
+        and month = #{month}
+    </update>
+
+    <insert id="insert" parameterType="com.ns.warlock.dto.SaleStatisDTO">
+        insert into ns_sale_statis
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="memberId != null">
+                member_id,
+            </if>
+            <if test="month != null">
+                month,
+            </if>
+            <if test="groupId != null">
+                group_id,
+            </if>
+            <if test="rate != null">
+                rate,
+            </if>
+            <if test="personSale != null">
+                person_sale,
+            </if>
+            <if test="leafSale != null">
+                leaf_sale,
+            </if>
+            <if test="groupSale != null">
+                group_sale,
+            </if>
+            <if test="saleGain != null">
+                sale_gain,
+            </if>
+            <if test="parentMemberId != null">
+                parent_member_id,
+            </if>
+            <if test="topMemberId != null">
+                top_member_id,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="memberId != null">
+                #{memberId},
+            </if>
+            <if test="month != null">
+                #{month},
+            </if>
+            <if test="groupId != null">
+                #{groupId},
+            </if>
+            <if test="rate != null">
+                #{rate},
+            </if>
+            <if test="personSale != null">
+                #{personSale},
+            </if>
+            <if test="leafSale != null">
+                #{leafSale},
+            </if>
+            <if test="groupSale != null">
+                #{groupSale},
+            </if>
+            <if test="saleGain != null">
+                #{saleGain},
+            </if>
+            <if test="parentMemberId != null">
+                #{parentMemberId},
+            </if>
+            <if test="topMemberId != null">
+                #{topMemberId},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="topMemberList" parameterType="string" resultMap="memberSaleMap">
+        select * from ns_sale_statis where month = #{month} and parent_member_id = 1
+    </select>
+
+</mapper>

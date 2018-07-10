@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.GroupDao">
+
+    <resultMap id="groupMap" type="com.ns.warlock.dto.GroupDTO" >
+        <id property="id" column="id"/>
+        <result property="memberCount" column="member_count"/>
+        <result property="createUser" column="create_user"/>
+        <result property="createUserName" column="create_user_name"/>
+        <result property="createDate" column="create_date"/>
+        <result property="orderAmount" column="order_amount"/>
+        <result property="coast" column="coast"/>
+        <result property="status" column="status"/>
+        <result property="groupLevel" column="group_level"/>
+        <result property="groupLevelName" column="group_level_name"/>
+    </resultMap>
+
+
+    <select id="findAll" resultMap="groupMap">
+        select memberGroup.id, memberGroup.member_count, memberGroup.create_user, memberGroup.coast, memberGroup.create_date,
+        memberGroup.status, memberGroup.group_level, groupLevel.group_level_name, member.nickname as create_user_name
+        from ns_member_group memberGroup, ns_member_group_level groupLevel, ns_member member
+        where 1=1
+        and memberGroup.group_level = groupLevel.id
+        and memberGroup.create_user = member.openid
+        order by memberGroup.id ASC
+    </select>
+
+    <select id="find" parameterType="java.lang.Long" resultMap="groupMap">
+        select memberGroup.id, memberGroup.member_count, memberGroup.create_user, memberGroup.coast, memberGroup.create_date,
+        memberGroup.status, memberGroup.group_level, groupLevel.group_level_name, member.nickname as create_user_name
+        from ns_member_group memberGroup, ns_member_group_level groupLevel, ns_member member
+        where 1=1
+        and memberGroup.group_level = groupLevel.id
+        and memberGroup.create_user = member.openid
+        and memberGroup.id = #{id}
+    </select>
+
+    <select id="findByCreateUser" parameterType="string" resultMap="groupMap">
+        select * from ns_member_group where create_user = #{openId}
+    </select>
+
+    <insert id="insert" parameterType="com.ns.warlock.dto.GroupDTO" useGeneratedKeys="true" keyProperty="id">
+        insert into ns_member_group
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="memberCount != null">
+                member_count,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+            <if test="createUser != null">
+                create_user,
+            </if>
+            <if test="coast != null">
+                coast,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="groupLevel != null">
+                group_level,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="memberCount != null">
+                #{memberCount},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+            <if test="createUser != null">
+                #{createUser},
+            </if>
+            <if test="coast != null">
+                #{coast},
+            </if>
+            <if test="status != null">
+                #{status},
+            </if>
+            <if test="groupLevel != null">
+                #{groupLevel},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.ns.warlock.dto.GroupDTO">
+        update ns_member_group
+        <set>
+            <if test="memberCount != null">
+                member_count = #{memberCount},
+            </if>
+            <if test="createDate != null">
+                create_date = #{createDate},
+            </if>
+            <if test="createUser != null">
+                create_user = #{createUser},
+            </if>
+            <if test="coast != null">
+                coast = #{coast},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="groupLevel != null">
+                group_level = #{groupLevel},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        delete from ns_member_group where id IN
+        <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <update id="monthGroupClear">
+        update ns_member_group set coast = 0 where 1=1
+    </update>
+
+</mapper>

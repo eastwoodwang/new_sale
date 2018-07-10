@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.OrderDao">
+
+    <resultMap id="orderMap" type="com.ns.warlock.dto.OrderDTO" >
+        <id property="id" column="id"/>
+        <result property="orderSn" column="order_sn"/>
+        <result property="orderStatus" column="order_status"/>
+        <result property="shippingSn" column="shipping_sn"/>
+        <result property="shippingStatus" column="shipping_status"/>
+        <result property="memberId" column="member_id"/>
+        <result property="memberName" column="member_name" />
+        <result property="totalAmount" column="total_amount"/>
+        <result property="addressId" column="address_id"/>
+        <result property="payDate" column="pay_date"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+
+    <select id="findAll" parameterType="string" resultMap="orderMap">
+        select *
+        from ns_order
+        where 1=1
+        order by id ASC
+    </select>
+
+    <select id="findByMemberId" parameterType="java.lang.Long" resultMap="orderMap">
+        select *
+        from ns_order
+        where 1=1
+        and member_id = #{memberId}
+        order by order_status ASC
+    </select>
+
+    <select id="find" parameterType="long" resultMap="orderMap">
+        select *
+        from ns_order
+        where 1=1
+        and id = #{id}
+    </select>
+
+
+    <update id="update" parameterType="com.ns.warlock.dto.OrderDTO">
+        update ns_order
+        <set>
+            <if test="totalAmount != null">
+                total_amount = #{totalAmount},
+            </if>
+            <if test="orderStatus != null">
+                order_status = #{orderStatus},
+            </if>
+            <if test="shippingStatus != null">
+                shipping_status = #{shippingStatus},
+            </if>
+            <if test="shippingSn != null">
+                shipping_sn = #{shippingSn},
+            </if>
+            <if test="payDate != null">
+                pay_date = #{payDate},
+            </if>
+            <if test="updateDate != null">
+                update_date = #{updateDate},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="cancel" parameterType="map">
+        update ns_order set order_status = '3' where member_id = #{memberId} and id IN
+        <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <insert id="create" parameterType="com.ns.warlock.dto.OrderDTO" useGeneratedKeys="true" keyProperty="id">
+        insert into ns_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderSn != null">
+                order_sn,
+            </if>
+            <if test="memberId != null">
+                member_id,
+            </if>
+            <if test="addressId != null">
+                address_id,
+            </if>
+            <if test="memo != null">
+                memo,
+            </if>
+            <if test="totalAmount != null">
+                total_amount,
+            </if>
+            <if test="orderStatus != null">
+                order_status,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderSn != null">
+                #{orderSn},
+            </if>
+            <if test="memberId != null">
+                #{memberId},
+            </if>
+            <if test="addressId != null">
+                #{addressId},
+            </if>
+            <if test="memo != null">
+                #{memo},
+            </if>
+            <if test="totalAmount != null">
+                #{totalAmount},
+            </if>
+            <if test="orderStatus != null">
+                #{orderStatus},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+        </trim>
+    </insert>
+
+</mapper>

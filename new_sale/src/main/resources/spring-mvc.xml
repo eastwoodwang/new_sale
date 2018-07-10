@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd"
+       default-lazy-init="true">
+
+
+    <context:property-placeholder location="classpath*:/resources.properties" ignore-resource-not-found="true"/>
+
+    <!-- 开启controller注解支持 -->
+    <!-- 注意事项请参考：http://jinnianshilongnian.iteye.com/blog/1762632 -->
+    <context:component-scan base-package="com.ns.warlock.controller"/>
+
+    <!-- 模板文件的及时扫描 -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/admin/**" />
+            <bean id="webContentInterceptor" class="org.springframework.web.servlet.mvc.WebContentInterceptor">
+                <property name="cacheSeconds" value="0" />
+            </bean>
+        </mvc:interceptor>
+
+        <!--<mvc:interceptor>-->
+            <!--<mvc:mapping path="/wechat/**"/>-->
+            <!--<bean id="localWechatInterceptor" class="" />-->
+        <!--</mvc:interceptor>-->
+    </mvc:interceptors>
+
+    <!-- 启用spring mvc 注解-->
+    <mvc:annotation-driven>
+        <!-- 启动JSON格式的配置 -->
+        <mvc:message-converters>
+            <!-- 这里也可以自己定制class -->
+            <ref bean="MappingJackson2HttpMessageConverter" />
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!--spring注解ResponseBody json返回-->
+    <bean id="MappingJackson2HttpMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+        <property name="supportedMediaTypes">
+            <list>
+                <value>text/html;charset=UTF-8</value>
+                <value>application/json;charset=UTF-8</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 静态资源映射 -->
+    <mvc:default-servlet-handler />
+
+    <!-- 静态资源映射
+    <mvc:resources mapping="/**" location="${template.loader_path}"/> -->
+
+    <!-- 默认的视图解析器 在上边的解析错误时使用 (默认使用html)- -->
+    <!--<bean id="defaultViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:order="1">-->
+        <!--<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>-->
+        <!--<property name="contentType" value="text/html"/>-->
+        <!--<property name="prefix" value="/WEB-INF/jsp/"/>-->
+        <!--<property name="suffix" value=".jsp"/>-->
+    <!--</bean>-->
+
+    <!-- 控制器异常处理 -->
+    <bean id="exceptionHandlerExceptionResolver" class="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver">
+    </bean>
+
+
+    <!-- 使用FreeMarker取代defaultViewResolver -->
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+        <property name="contentType" value="text/html; charset=UTF-8" />
+        <property name="suffix" value="${template.suffix}" />
+    </bean>
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="UTF-8" />
+    </bean>
+
+
+    <!-- Swagger配置 -->
+    <bean class="com.ns.warlock.config.RestApiConfig"></bean>
+
+</beans>

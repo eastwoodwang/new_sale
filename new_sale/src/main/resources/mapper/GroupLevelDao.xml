@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.GroupLevelDao">
+
+    <resultMap id="groupLevelMap" type="com.ns.warlock.dto.GroupLevelDTO">
+        <id property="id" column="id"/>
+        <result property="groupLevelName" column="group_level_name"/>
+        <result property="minRange" column="min_range"/>
+        <result property="maxRange" column="max_range"/>
+        <result property="discountRate" column="discount_rate"/>
+        <result property="priority" column="priority"/>
+    </resultMap>
+
+    <select id="findAll" resultMap="groupLevelMap">
+        select * from ns_member_group_level
+        where 1=1
+        order by priority ASC
+    </select>
+
+    <select id="find" parameterType="java.lang.Long" resultMap="groupLevelMap">
+        select * from ns_member_group_level where id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.ns.warlock.dto.GroupLevelDTO">
+        insert into ns_member_group_level(group_level_name, min_range, max_range, discount_rate, priority)
+        values(#{groupLevelName}, #{minRange}, #{maxRange}, #{discountRate}, #{priority})
+    </insert>
+
+    <update id="update" parameterType="com.ns.warlock.dto.GroupLevelDTO">
+        update ns_member_group_level
+        <set>
+            <if test="groupLevelName != null">
+                group_level_name = #{groupLevelName},
+            </if>
+            <if test="minRange != null">
+                min_range = #{minRange},
+            </if>
+            <if test="maxRange != null">
+                max_range = #{maxRange},
+            </if>
+            <if test="discountRate != null">
+                discount_rate = #{discountRate},
+            </if>
+            <if test="priority != null">
+                priority = #{priority},
+            </if>
+        </set>
+        where 1=1
+        and id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="Long[]">
+        delete from ns_member_group_level where id IN
+        <foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="findInitGroupLevel" resultType="string">
+        select id from ns_member_group_level order by priority asc limit 1
+    </select>
+</mapper>

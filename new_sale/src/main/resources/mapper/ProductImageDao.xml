@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.ProductImageDao">
+
+    <resultMap id="productImageMap" type="com.ns.warlock.dto.ProductImageDTO" >
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="source" column="source"/>
+        <result property="large" column="large"/>
+        <result property="medium" column="medium"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="imageOrder" column="image_order"/>
+        <result property="productSn" column="product_sn"/>
+    </resultMap>
+
+
+    <select id="findByProductSn" parameterType="java.lang.String" resultMap="productImageMap">
+        select *
+        from ns_product_image
+        where 1=1
+        and product_sn = #{productSn}
+    </select>
+
+    <insert id="insert" parameterType="com.ns.warlock.dto.ProductImageDTO">
+        insert into ns_product_image
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">
+                title,
+            </if>
+            <if test="source != null">
+                source,
+            </if>
+            <if test="large != null">
+                large,
+            </if>
+            <if test="medium != null">
+                medium,
+            </if>
+            <if test="thumbnail != null">
+                thumbnail,
+            </if>
+            <if test="imageOrder != null">
+                image_order,
+            </if>
+            <if test="productSn != null">
+                product_sn,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="title != null">
+                #{title},
+            </if>
+            <if test="source != null">
+                #{source},
+            </if>
+            <if test="large != null">
+                #{large},
+            </if>
+            <if test="medium != null">
+                #{medium},
+            </if>
+            <if test="thumbnail != null">
+                #{thumbnail},
+            </if>
+            <if test="imageOrder != null">
+                #{imageOrder},
+            </if>
+            <if test="productSn != null">
+                #{productSn},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.ns.warlock.dto.ProductImageDTO">
+        update ns_product_image
+        <set>
+            <if test="title != null">
+                #{title},
+            </if>
+            <if test="source != null">
+                #{source},
+            </if>
+            <if test="large != null">
+                #{large},
+            </if>
+            <if test="medium != null">
+                #{medium},
+            </if>
+            <if test="thumbnail != null">
+                #{thumbnail},
+            </if>
+            <if test="order != null">
+                #{order},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+
+</mapper>

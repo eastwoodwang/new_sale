@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.CartDao">
+
+    <resultMap id="cartMap" type="com.ns.warlock.dto.CartDTO" >
+        <id property="id" column="id"/>
+        <result property="memberId" column="member_id"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+
+    <insert id="insert" parameterType="com.ns.warlock.dto.CartDTO" useGeneratedKeys="true" keyProperty="id">
+        insert into ns_cart
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="memberId != null">
+                member_id,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="memberId != null">
+                #{memberId},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+        </trim>
+    </insert>
+
+
+    <select id="find" parameterType="string" resultType="com.ns.warlock.dto.CartDTO">
+        select * from ns_cart where 1=1 and member_id = #{memberId,jdbcType=VARCHAR}
+    </select>
+
+</mapper>

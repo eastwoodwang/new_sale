@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <setting name="siteName" value="牛小福商城" />
+    <setting name="siteUrl" value="http://localhost:8090" />
+    <setting name="largeProductImageWidth" value="800" />
+    <setting name="largeProductImageHeight" value="800" />
+    <setting name="mediumProductImageWidth" value="300" />
+    <setting name="mediumProductImageHeight" value="300" />
+    <setting name="thumbnailProductImageWidth" value="170" />
+    <setting name="thumbnailProductImageHeight" value="170" />
+    <setting name="defaultLargeProductImage" value="/upload/image/default_large.jpg" />
+    <setting name="defaultMediumProductImage" value="/upload/image/default_medium.jpg" />
+    <setting name="defaultThumbnailProductImage" value="/upload/image/default_thumbnail.jpg" />
+    <setting name="watermarkAlpha" value="50" />
+    <setting name="watermarkImage" value="/upload/image/watermark.png" />
+    <setting name="watermarkPosition" value="bottomRight" />
+    <setting name="priceScale" value="2" />
+    <setting name="priceRoundType" value="roundHalfUp" />
+    <setting name="uploadImageExtension" value="jpg,jpeg,bmp,gif,png" />
+    <setting name="uploadMaxSize" value="10" />
+    <setting name="imageUploadPath" value="/upload/image/${.now?string('yyyyMM')}/" />
+    <setting name="titleImagePath" value="" />
+    <setting name="promptImagePath" value="" />
+</project>

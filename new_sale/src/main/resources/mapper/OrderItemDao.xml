@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.OrderItemDao">
+
+    <resultMap id="orderItemMap" type="com.ns.warlock.dto.OrderItemDTO" >
+        <id property="id" column="id"/>
+        <result property="orderId" column="order_id" />
+        <result property="productSn" column="product_sn" />
+        <result property="productId" column="product_id" />
+        <result property="orderPrice" column="order_price"/>
+        <result property="name" column="name"/>
+        <result property="price" column="price"/>
+        <result property="quantity" column="quantity"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="itemTotalPrice" column="total_price"/>
+        <result property="createDate" column="create_date"/>
+    </resultMap>
+
+
+    <select id="findList" parameterType="map" resultMap="orderItemMap">
+        select item.*, prod.name, prod.price, image.thumbnail, prod.sn as product_sn
+        from ns_order ord, ns_order_item item, ns_product prod, ns_product_image image
+        where 1=1
+        and ord.member_id = #{memberId}
+        and ord.id = item.order_id
+        and item.product_id = prod.id
+        and prod.sn = image.product_sn
+        and image.image_order = 1
+        and ord.id = #{orderId}
+        order by item.id ASC
+    </select>
+
+    <insert id="create" parameterType="com.ns.warlock.dto.OrderItemDTO">
+        insert into ns_order_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">
+                order_id,
+            </if>
+            <if test="productId >0 ">
+                product_id,
+            </if>
+            <if test="orderPrice != null">
+                order_price,
+            </if>
+            <if test="quantity != null">
+                quantity,
+            </if>
+            <if test="itemTotalPrice != null">
+                total_price,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="orderId != null">
+                #{orderId},
+            </if>
+            <if test="productId >0 ">
+                #{productId},
+            </if>
+            <if test="orderPrice != null">
+                #{orderPrice},
+            </if>
+            <if test="quantity != null">
+                #{quantity},
+            </if>
+            <if test="itemTotalPrice != null">
+                #{itemTotalPrice},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+        </trim>
+    </insert>
+
+</mapper>

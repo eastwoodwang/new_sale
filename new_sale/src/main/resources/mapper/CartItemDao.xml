@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.CartItemDao">
+
+    <resultMap id="cartItemMap" type="com.ns.warlock.dto.CartItemDTO" >
+        <id property="id" column="id"/>
+        <result property="cartId" column="cart_id"/>
+        <result property="quantity" column="quantity"/>
+        <result property="productId" column="product_id"/>
+        <result property="productName" column="name"/>
+        <result property="displayImage" column="display_image"/>
+        <result property="marketable" column="marketable" />
+        <result property="price" column="price" />
+        <result property="createDate" column="create_date"/>
+    </resultMap>
+
+    <select id="findAll" parameterType="java.lang.Long" resultMap="cartItemMap">
+        select item.*, product.name, product.price, product.display_image, product.marketable
+        from ns_cart cart, ns_product product, ns_cart_item item
+        where cart.member_id = #{memberId}
+        and cart.id = item.cart_id
+        and item.product_id = product.id
+        order by item.id ASC
+    </select>
+
+    <select id="findList" parameterType="map" resultMap="cartItemMap">
+        select item.id, item.cart_id, item.product_id, item.quantity, item.price from ns_cart_item item, ns_cart cart
+        where item.cart_id = cart.id
+        and cart.member_id = #{memberId}
+        and item.id IN
+        <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <update id="addQuantity" parameterType="java.lang.Long">
+        update ns_cart_item set quantity = quantity + 1 where id = #{id}
+    </update>
+
+    <update id="subQuantity" parameterType="java.lang.Long">
+        update ns_cart_item set quantity = quantity - 1 where id = #{id}
+    </update>
+
+    <select id="checkProductExist" parameterType="map" resultType="com.ns.warlock.dto.CartItemDTO">
+        select * from ns_cart_item where cart_id = #{cartId} and product_id = #{productId}
+    </select>
+
+
+    <delete id="delete" parameterType="Long[]">
+        delete from ns_cart_item where id IN
+        <foreach collection="array" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+
+    <insert id="insert" parameterType="com.ns.warlock.dto.CartItemDTO">
+        insert into ns_cart_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="cartId != null">
+                cart_id,
+            </if>
+            <if test="productId != null">
+                product_id,
+            </if>
+            <if test="quantity != null">
+                quantity,
+            </if>
+            <if test="price != null">
+                price,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="cartId != null">
+                #{cartId},
+            </if>
+            <if test="productId != null">
+                #{productId},
+            </if>
+            <if test="quantity != null">
+                #{quantity},
+            </if>
+            <if test="price != null">
+                #{price},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="java.lang.Integer">
+        update ns_cart_item
+        <set>
+            <if test="quantity != null">
+                quantity = #{0}
+            </if>
+        </set>
+        where id = #{1}
+    </update>
+
+</mapper>

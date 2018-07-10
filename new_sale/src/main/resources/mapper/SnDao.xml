@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.SnDao">
+
+    <resultMap id="snMap" type="com.ns.warlock.dto.SnDTO" >
+        <id property="id" column="id"/>
+        <result property="lastValue" column="last_value"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+
+    <select id="getLastValue" parameterType="java.lang.Integer" resultType="java.lang.Long">
+        SELECT sn.last_value FROM ns_sn sn WHERE sn.type = #{type}
+    </select>
+
+    <update id="updateLastValue">
+        UPDATE ns_sn sn set sn.last_value = #{0} where sn.type = #{1}
+    </update>
+</mapper>

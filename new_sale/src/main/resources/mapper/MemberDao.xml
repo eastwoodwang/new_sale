@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.MemberDao">
+
+    <resultMap id="memberMap" type="com.ns.warlock.dto.MemberDTO" >
+        <id property="id" column="id"/>
+        <result property="openId" column="openid"/>
+        <result property="nickname" column="nickname"/>
+        <result property="headerUrl" column="header_url"/>
+        <result property="sex" column="sex"/>
+        <result property="registerDate" column="register_date"/>
+        <result property="lastLoginDate" column="last_login_date"/>
+        <result property="ownerCoast" column="current_owner_coast"/>
+        <result property="leafCoast" column="current_leaf_coast"/>
+        <result property="groupCoast" column="group_coast"/>
+        <result property="memberLevel" column="member_level"/>
+        <result property="memberLevelName" column="member_level_name"/>
+        <result property="qrCodeUrl" column="qr_code_url"/>
+        <result property="groupId" column="group_id"/>
+        <result property="groupName" column="group_Name"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="parentOpenId" column="parent_openid" />
+        <result property="parentTree" column="parent_tree" />
+        <result property="status" column="status" />
+        <result property="channelType" column="channel_type" />
+        <result property="balance" column="balance" />
+        <result property="priority" column="priority" />
+        <result property="createDate" column="create_date" />
+        <result property="rate" column="rate" />
+    </resultMap>
+
+
+    <select id="findAll" resultMap="memberMap">
+        select member.*, memberLevel.level_name as member_level_name
+        from ns_member member, ns_member_level memberLevel
+        where 1=1
+        and member.member_level = memberLevel.id
+        order by id ASC
+    </select>
+
+    <select id="findAllStatis" resultMap="memberMap">
+        select member.id, member.parent_id, member.group_id, member.current_owner_coast, member.current_leaf_coast,
+        memgrp.coast as group_coast, grpLevel.discount_rate as rate
+        from ns_member member, ns_member_group memgrp, ns_member_group_level grpLevel
+        where 1=1
+        and member.parent_id is not null
+        and memgrp.id = member.group_id
+        and member.current_owner_coast + member.current_leaf_coast between grpLevel.min_range and grpLevel.max_range
+        order by member.id ASC
+    </select>
+
+    <select id="find" parameterType="java.lang.Long" resultMap="memberMap">
+        select member.*, memberLevel.level_name as member_level_name
+        from ns_member member, ns_member_level memberLevel
+        where 1=1
+        and member.member_level = memberLevel.id
+        and member.id = #{id}
+    </select>
+
+
+    <insert id="insert" parameterType="com.ns.warlock.dto.MemberDTO" useGeneratedKeys="true" keyProperty="id">
+        insert into ns_member
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="openId != null">
+                openid,
+            </if>
+            <if test="nickname != null">
+                nickname,
+            </if>
+            <if test="headerUrl != null">
+                header_url,
+            </if>
+            <if test="registerDate != null">
+                register_date,
+            </if>
+            <if test="lastLoginDate != null">
+                last_login_date,
+            </if>
+            <if test="ownerCoast != null">
+                current_owner_coast,
+            </if>
+            <if test="leafCoast != null">
+                current_leaf_coast,
+            </if>
+            <if test="memberLevel != null">
+                member_level,
+            </if>
+            <if test="qrCodeUrl != null">
+                qr_code_url,
+            </if>
+            <if test="groupId != null">
+                group_id,
+            </if>
+            <if test="parentId != null">
+                parent_id,
+            </if>
+            <if test="parentOpenId != null" >
+                parent_openid,
+            </if>
+            <if test="parentTree != null" >
+                parent_tree,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="balance != null">
+                balance,
+            </if>
+            <if test="priority > 0">
+                priority,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="openId != null">
+                #{openId},
+            </if>
+            <if test="nickname != null">
+                #{nickname},
+            </if>
+            <if test="headerUrl != null">
+                #{headerUrl},
+            </if>
+            <if test="registerDate != null">
+                #{registerDate},
+            </if>
+            <if test="lastLoginDate != null">
+                #{lastLoginDate},
+            </if>
+            <if test="ownerCoast != null">
+                #{ownerCoast},
+            </if>
+            <if test="leafCoast != null">
+                #{leafCoast},
+            </if>
+            <if test="memberLevel != null">
+                #{memberLevel},
+            </if>
+            <if test="qrCodeUrl != null">
+                #{qrCodeUrl},
+            </if>
+            <if test="groupId != null">
+                #{groupId},
+            </if>
+            <if test="parentId != null">
+                #{parentId},
+            </if>
+            <if test="parentOpenId != null" >
+                #{parentOpenId},
+            </if>
+            <if test="parentTree != null" >
+                #{parentTree},
+            </if>
+            <if test="status != null">
+                #{status},
+            </if>
+            <if test="balance != null">
+                #{balance},
+            </if>
+            <if test="priority > 0">
+                #{priority},
+            </if>
+            <if test="createDate != null">
+                #{createDate},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.ns.warlock.dto.MemberDTO">
+        update ns_member
+        <set>
+            <if test="lastLoginDate != null">
+                last_login_date = #{lastLoginDate},
+            </if>
+            <if test="ownerCoast != null">
+                current_owner_coast = #{ownerCoast},
+            </if>
+            <if test="leafCoast != null">
+                current_leaf_coast = #{leafCoast},
+            </if>
+            <if test="memberLevel != null">
+                member_level = #{memberLevel},
+            </if>
+            <if test="qrCodeUrl != null">
+                qr_code_url = #{qrCodeUrl},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="balance != null">
+                balance = #{balance},
+            </if>
+            <if test="parentTree != null" >
+                parent_tree = #{parentTree},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        delete from ns_member where id IN
+        <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!-- Caused by: org.apache.ibatis.builder.IncompleteElementException: Could not find parameter map com.ns.warlock.dao.MemberDao.string
+    parameterMap="string" 写错导致 -->
+    <select id="checkMemberRegister" parameterType="string" resultType="com.ns.warlock.dto.MemberDTO">
+        select * from ns_member where openid = #{openId}
+    </select>
+
+
+    <select id="checkMemberExist" parameterType="string" resultType="com.ns.warlock.dto.MemberDTO">
+        select * from ns_member where phone = #{memberPhone}
+    </select>
+
+    <update id="monthClear">
+        update ns_member
+        set current_owner_coast = 0,
+        current_leaf_coast = 0
+        where 1=1
+    </update>
+
+</mapper>
