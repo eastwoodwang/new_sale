@@ -275,7 +275,7 @@ public class WechatMemberController extends BaseController {
         JSONObject jsonObject = WeixinUtil.getOpenIdMap(code);
 		if (null == jsonObject || StringUtils.isEmpty(jsonObject.getString("openid"))) {
 			result.setCode(ERROR_CODE);
-			result.setMessage("微信获取信息失败");
+			result.setMessage("微信获取信息失败:"+jsonObject);
 			return result;
 		}
 		String openid = jsonObject.getString("openid");
@@ -290,7 +290,7 @@ public class WechatMemberController extends BaseController {
 		jsonObject = WeixinUtil.getUserInfoMap(jsonObject.getString("access_token"), openid);
 		if (null == jsonObject || StringUtils.isEmpty(jsonObject.getString("openid"))) {
 			result.setCode(ERROR_CODE);
-			result.setMessage("微信拉取信息失败");
+			result.setMessage("微信拉取信息失败:"+jsonObject);
 			return result;
 		}
 		String nickname = jsonObject.getString("nickname");
