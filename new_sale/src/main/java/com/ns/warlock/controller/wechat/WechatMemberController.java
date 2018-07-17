@@ -1,16 +1,21 @@
 package com.ns.warlock.controller.wechat;
 
+import com.alibaba.fastjson.JSONObject;
 import com.ns.warlock.common.ErrorCode;
 import com.ns.warlock.common.Result;
 import com.ns.warlock.dto.GroupDTO;
 import com.ns.warlock.dto.MemberAddressDTO;
 import com.ns.warlock.dto.MemberDTO;
 import com.ns.warlock.service.*;
+import com.ns.warlock.util.WeixinUtil;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.util.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +29,7 @@ import java.util.Date;
 @CrossOrigin
 public class WechatMemberController extends BaseController {
 
+	public static Logger log = LoggerFactory.getLogger(WechatMemberController.class);
 
     @Resource(name = "memberServiceImpl")
     private MemberService memberService;
@@ -254,6 +260,106 @@ public class WechatMemberController extends BaseController {
         return result;
     }
 
+    /**
+     * 微信入口
+     * @param openid
+     * @return
+     */
+    @PostMapping(value = "/income")
+    @ApiOperation(value = "微信入口", notes = "微信入口并返回用户信息")
+    public @ResponseBody
+    Result checkMemberRegister(@ApiParam(required = true, name = "code", value = "微信返回code")@RequestParam String code,
+    		@ApiParam(required = false, name = "fromOpenId", value = "推荐人openID")@RequestParam(required = false) String fromOpenId) {
+    	log.info("fromOpenId:"+fromOpenId);
+        Result result = new Result();
+        JSONObject jsonObject = WeixinUtil.getOpenIdMap(code);
+		if (null == jsonObject || StringUtils.isEmpty(jsonObject.getString("openid"))) {
+			result.setCode(ERROR_CODE);
+			result.setMessage("微信获取信息失败");
+			return result;
+		}
+		String openid = jsonObject.getString("openid");
+		log.info("openid:"+openid);
+		MemberDTO registerMemberDTO = memberService.checkMemberRegister(openid);
+		if (registerMemberDTO != null) {
+            result.setCode(SUCCESS_CODE);
+            result.setMessage(SUCCESS_MESSAGE);
+            result.setData(registerMemberDTO);
+            return result;
+        }
+		jsonObject = WeixinUtil.getUserInfoMap(jsonObject.getString("access_token"), openid);
+		if (null == jsonObject || StringUtils.isEmpty(jsonObject.getString("openid"))) {
+			result.setCode(ERROR_CODE);
+			result.setMessage("微信拉取信息失败");
+			return result;
+		}
+		String nickname = jsonObject.getString("nickname");
+		String sex = jsonObject.getString("sex");
+		String headImgUrl = jsonObject.getString("headimgurl");
+	
+        registerMemberDTO = new MemberDTO();
+        registerMemberDTO.setOpenId(openid);
+        if (!StringUtils.isEmpty(nickname)) {
+            registerMemberDTO.setNickname(nickname);
+            log.info("nickname:"+nickname);
+        }
+        if (!StringUtils.isEmpty(sex)) {
+            registerMemberDTO.setSex(sex);
+            log.info("sex:"+sex);
+        }
+        if (!StringUtils.isEmpty(headImgUrl)) {
+            registerMemberDTO.setHeaderUrl(headImgUrl);
+            log.info("headImgUrl:"+headImgUrl);
+        }
+        //获取推荐用户的信息
+        
+        MemberDTO fromMemberDTO = memberService.checkMemberRegister(fromOpenId);
+        if (null == fromMemberDTO) {
+        	result.setCode(ERROR_CODE);
+			result.setMessage("推荐人不正确");
+			return result;
+        }
+        //检查推荐用户是否为根用户
+        long groupId = 0;
+        String parentTree = null;
+        if (StringUtils.isNotEmpty(fromMemberDTO.getParentOpenId())) {
+            //nothing need to do
+            //不是根用户就拿推荐用户的信息
+            groupId = fromMemberDTO.getGroupId();
 
+            //拿推荐用户组装
+            parentTree = fromMemberDTO.getParentTree() + fromMemberDTO.getId() + TREE_SEPERETE;
+        } else {
+            //需要新建组
+            GroupDTO groupDTO = new GroupDTO();
+            groupDTO.setMemberCount(1l);
+            groupDTO.setCoast(new BigDecimal(0));
+            groupDTO.setCreateUser(openid);
+            groupDTO.setStatus(1);
+            groupDTO.setGroupLevel(Integer.parseInt(groupLevelService.findInitGroupLevel()));
+            groupDTO.setCreateDate(new Date());
+            groupService.create(groupDTO);
+            parentTree = fromMemberDTO.getId() + TREE_SEPERETE;
+            groupId = groupDTO.getId();
+        }
+        //保存
+        registerMemberDTO.setRegisterDate(new Date());
+        registerMemberDTO.setCreateDate(new Date());
+        registerMemberDTO.setPriority(fromMemberDTO.getPriority() + 1);
+        registerMemberDTO.setGroupId(groupId); //所在的组
+        registerMemberDTO.setGroupName(fromMemberDTO.getGroupName()); //所在的组名
+        registerMemberDTO.setParentId(fromMemberDTO.getId());  //所属上一级ID
+        registerMemberDTO.setParentOpenId(fromOpenId); //所属上一级openID
+        registerMemberDTO.setParentTree(parentTree);   //设置树结构
+        registerMemberDTO.setMemberLevel(memberLevelService.findInitLevel());
+        registerMemberDTO.setOwnerCoast(new BigDecimal(0));
+        registerMemberDTO.setLeafCoast(new BigDecimal(0));
+        //创建用户
+        memberService.insert(registerMemberDTO);
+        result.setCode(SUCCESS_CODE);
+        result.setMessage(SUCCESS_MESSAGE);
+        result.setData(registerMemberDTO);
+        return result;
+    }
 
 }
