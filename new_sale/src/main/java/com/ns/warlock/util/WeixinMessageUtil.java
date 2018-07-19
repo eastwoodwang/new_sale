@@ -14,7 +14,7 @@ import org.dom4j.io.SAXReader;
 
 /**
  * 微信通用接口工具类
- * @author caspar.chen
+ * @author lzz
  * @version 1.0
  * 
  */
