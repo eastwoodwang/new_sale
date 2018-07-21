@@ -4,36 +4,30 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-import javax.servlet.http.HttpServletResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.ns.warlock.util.ConstantWeChat;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.ns.warlock.dto.AccessToken;
 
-//import net.sf.json.JSONException;
-//import net.sf.json.JSONObject;
 /**
  * 微信通用接口工具类
  * @author caspar.chen
@@ -43,7 +37,7 @@ import com.ns.warlock.dto.AccessToken;
 public class WeixinUtil {
 
 	public static Logger log = LoggerFactory.getLogger(WeixinUtil.class);
-	private static Map<String, Map<Long, String>> tokenMap = new HashMap<String, Map<Long, String>>();
+	private static Map<String, AccessToken> tokenMap = new HashMap<String, AccessToken>();
 	/**
 	 * 获取access_token的接口地址（GET） 限200（次/天）
 	 */
@@ -111,7 +105,7 @@ public class WeixinUtil {
 	 *            密钥
 	 * @return AccessToken对象
 	 */
-	public static AccessToken getAccessToken(String appid, String appsecret) {
+	private static AccessToken getAccessToken(String appid, String appsecret) {
 		AccessToken accessToken = null;
 
 		String requestUrl = ACCESS_TOKEN.replace("APPID", appid).replace(
@@ -120,9 +114,7 @@ public class WeixinUtil {
 		// 如果请求成功
 		if (null != jsonObject) {
 			try {
-				accessToken = new AccessToken();
-				accessToken.setToken(jsonObject.getString("access_token"));
-				accessToken.setExpiresIn(jsonObject.getInteger("expires_in"));
+				accessToken = new AccessToken(jsonObject.getString("access_token"), jsonObject.getInteger("expires_in"));
 			} catch (JSONException e) {
 				accessToken = null;
 				// 获取token失败
@@ -135,48 +127,74 @@ public class WeixinUtil {
 
 	/**
 	 * 获取token值
-	 * 
+	 * 只能单机部署,不能负载均衡
 	 * @return token
 	 */
 	public static String getToken() {
 		return getToken(ConstantWeChat.APPID, ConstantWeChat.APPSECRET);
 	}
 	
+	/**
+	 * 获取token值
+	 * 只能单机部署,不能负载均衡
+	 * @return token
+	 */
 	public static String getToken(String appId, String appsecret) {
-		StringBuffer sb = new StringBuffer();
-		sb.append(appId).append(",").append(appsecret);
-		if(tokenMap.containsKey(sb.toString())){
-			Map<Long, String> map = tokenMap.get(sb.toString());
-			Long time = map.keySet().iterator().next();
-			if(Calendar.getInstance().getTimeInMillis() - time > 7000000){
-				String token = getTokenStr(appId, appsecret);
-				if(token != null){
-					map = new HashMap<>();
-					map.put(Calendar.getInstance().getTimeInMillis(), token);
-					tokenMap.put(sb.toString(), map);
-				}
-				return token;
-			}else{
-				return map.get(time);
+		String sb = appId + appsecret;
+		AccessToken token = null;
+		if(tokenMap.containsKey(sb)){
+			token = tokenMap.get(sb);
+			if (System.currentTimeMillis() < token.getTimeMillis()) {
+				return token.getToken();
 			}
-		}else{
-			String token = getTokenStr(appId, appsecret);
-			if(token != null){
-				Map<Long, String> map = new HashMap<>();
-				map.put(Calendar.getInstance().getTimeInMillis(), token);
-				tokenMap.put(sb.toString(), map);
-			}
-			return token;
 		}
+		token = getAccessToken(appId, appsecret);
+		tokenMap.put(sb, token);
+		return token.getToken();
+	}
+
+	/**
+	 * 创建永久二维码(字符串)
+	 * 
+	 * @param accessToken
+	 * @param sceneStr 参数
+	 *            场景str
+	 * @return
+	 */
+	public static String createForeverStrTicket(String sceneStr) {
+        return createForeverStrTicket(getToken(), sceneStr);
 	}
 	
-	private static String getTokenStr(String appId, String appsecret){
-		AccessToken at = WeixinUtil.getAccessToken(appId, appsecret);
-		if (null != at) {
-			return at.getToken();
-		} else {
-			return null;
+	/**
+	 * 创建永久二维码(字符串)
+	 * 
+	 * @param accessToken
+	 * @param sceneStr 参数
+	 *            场景str
+	 * @return
+	 */
+	public static String createForeverStrTicket(String accessToken, String sceneStr) {
+		//发送post 请求 ticke
+        String url="https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token="+accessToken;
+        String param = "{\"action_name\": \"QR_LIMIT_STR_SCENE\", \"action_info\": {\"scene\": {\"scene_str\": \"sceneStr\"}}}".replace("sceneStr", sceneStr);
+        JSONObject jsonObject = httpsRequest(url, "POST", param);
+        if (null != jsonObject) {
+        		return jsonObject.getString("ticket");
+        }
+        return null;
+	}
+	
+	/**
+	 * 获取永久二维码
+	 * @param sceneStr
+	 * @return 二维码的地址
+	 */
+	public static String getQrCodeUrl(String sceneStr) {
+		String ticket = createForeverStrTicket(sceneStr);
+		if (null != ticket) {			
+			return "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket="+urlEncode(ticket, "utf-8");
 		}
+		return null;
 	}
 
 	/**
@@ -312,5 +330,15 @@ public class WeixinUtil {
         } catch (Exception e) {
             return null;
         }
+    }
+    
+    public static String urlEncode(String source, String encode) {
+        String result = source;  
+        try {
+            result = URLEncoder.encode(source, encode);  
+        } catch (UnsupportedEncodingException e) {  
+            e.printStackTrace();  
+        }  
+        return result;  
     }
 }

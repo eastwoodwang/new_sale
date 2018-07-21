@@ -191,6 +191,7 @@ public class WechatMemberController extends BaseController {
 
             registerMemberDTO = new MemberDTO();
             registerMemberDTO.setOpenId(openid);
+            registerMemberDTO.setQrCodeUrl(WeixinUtil.getQrCodeUrl(openid));
 
             if (!StringUtils.isEmpty(nickname)) {
                 registerMemberDTO.setNickname(nickname);
@@ -299,6 +300,7 @@ public class WechatMemberController extends BaseController {
 	
         registerMemberDTO = new MemberDTO();
         registerMemberDTO.setOpenId(openid);
+        registerMemberDTO.setQrCodeUrl(WeixinUtil.getQrCodeUrl(openid));
         if (!StringUtils.isEmpty(nickname)) {
             registerMemberDTO.setNickname(nickname);
             log.info("nickname:"+nickname);
