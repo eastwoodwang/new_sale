@@ -31,8 +31,8 @@ public class WechatMemberController extends BaseController {
 
 	public static Logger log = LoggerFactory.getLogger(WechatMemberController.class);
 
-    @Resource(name = "memberServiceImpl")
-    private MemberService memberService;
+	@Resource(name = "memberServiceImpl")
+	private MemberService memberService;
 
     @Resource(name = "memberAddressServiceImpl")
     private MemberAddressService memberAddressService;
@@ -266,7 +266,7 @@ public class WechatMemberController extends BaseController {
      * @param openid
      * @return
      */
-    @PostMapping(value = "/income")
+    @GetMapping(value = "/income")
     @ApiOperation(value = "微信入口", notes = "微信入口并返回用户信息")
     public @ResponseBody
     Result checkMemberRegister(@ApiParam(required = true, name = "code", value = "微信返回code")@RequestParam String code,
@@ -300,7 +300,6 @@ public class WechatMemberController extends BaseController {
 	
         registerMemberDTO = new MemberDTO();
         registerMemberDTO.setOpenId(openid);
-        registerMemberDTO.setQrCodeUrl(WeixinUtil.getQrCodeUrl(openid));
         if (!StringUtils.isEmpty(nickname)) {
             registerMemberDTO.setNickname(nickname);
             log.info("nickname:"+nickname);
@@ -356,6 +355,7 @@ public class WechatMemberController extends BaseController {
         registerMemberDTO.setMemberLevel(memberLevelService.findInitLevel());
         registerMemberDTO.setOwnerCoast(new BigDecimal(0));
         registerMemberDTO.setLeafCoast(new BigDecimal(0));
+        registerMemberDTO.setQrCodeUrl(WeixinUtil.getQrCodeUrl(openid));
         //创建用户
         memberService.insert(registerMemberDTO);
         result.setCode(SUCCESS_CODE);
