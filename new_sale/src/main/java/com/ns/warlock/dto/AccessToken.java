@@ -14,6 +14,11 @@ public class AccessToken {
 	 *  凭证有效时间，单位：秒
 	 */
 	private int expiresIn;
+	
+	/**
+	 *  有效期时间戳，System.currentTimeMillis()
+	 */
+	private long timeMillis;
 
 	public String getToken() {
 		return token;
@@ -31,13 +36,19 @@ public class AccessToken {
 		this.expiresIn = expiresIn;
 	}
 
+	public long getTimeMillis() {
+		return timeMillis;
+	}
+
+	public void setTimeMillis(long timeMillis) {
+		this.timeMillis = timeMillis;
+	}
+
 	public AccessToken(String token, int expiresIn) {
 		super();
 		this.token = token;
 		this.expiresIn = expiresIn;
-	}
-
-	public AccessToken() {
-		super();
+		//提前十分钟失效
+		this.timeMillis = System.currentTimeMillis() + (expiresIn*1000 - 60000);
 	}
 }
