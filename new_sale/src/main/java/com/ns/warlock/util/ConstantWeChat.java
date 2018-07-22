@@ -20,7 +20,7 @@ public class ConstantWeChat {
 	/**
 	 * 第三方用户唯一凭证密钥
 	 */
-	public static String APPSECRET = "7037d4583b7a0478b5dbf96122c45a51";
+	public static String APPSECRET = "35fd80b23187829c0c797600aa03df33";
 	
 	/**
 	 * 返回消息类型：文本
