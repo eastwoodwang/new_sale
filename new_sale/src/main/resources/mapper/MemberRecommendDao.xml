@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ns.warlock.dao.MemberRecommendDao">
+
+    <resultMap id="memberRecommendMap" type="com.ns.warlock.dto.MemberRecommendDTO" >
+        <id property="id" column="id"/>
+        <result property="openId" column="openid"/>
+        <result property="parentOpenId" column="parent_openid" />
+        <result property="createDate" column="create_date" />
+    </resultMap>
+
+	<sql id="Base_Column_List" >
+	    id, openid, parent_openid, create_date
+  	</sql>
+
+    <select id="findAll" resultMap="memberRecommendMap" parameterType="java.lang.String">
+        select 
+		<include refid="Base_Column_List" />
+        from ns_member_recommend
+        where openid = #{openId}
+    </select>
+
+    <select id="find" resultMap="memberRecommendMap" parameterType="java.lang.String">
+        SELECT 
+		<include refid="Base_Column_List" />
+        FROM ns_member_recommend
+        WHERE openid = #{openId}
+        ORDER BY create_date ASC
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="com.ns.warlock.dto.MemberRecommendDTO" >
+        insert into ns_member_recommend (openid, parent_id, create_date) values (#{openId}, #{parentOpenId}, NOW())
+    </insert>
+</mapper>

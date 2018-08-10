@@ -6,6 +6,7 @@ import com.ns.warlock.common.Result;
 import com.ns.warlock.dto.GroupDTO;
 import com.ns.warlock.dto.MemberAddressDTO;
 import com.ns.warlock.dto.MemberDTO;
+import com.ns.warlock.dto.MemberRecommendDTO;
 import com.ns.warlock.service.*;
 import com.ns.warlock.util.WeixinUtil;
 
@@ -16,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +35,9 @@ public class WechatMemberController extends BaseController {
 
 	@Resource(name = "memberServiceImpl")
 	private MemberService memberService;
+
+	@Resource(name = "memberRecommendServiceImpl")
+	private MemberRecommendService memberRecommendService;
 
     @Resource(name = "memberAddressServiceImpl")
     private MemberAddressService memberAddressService;
@@ -316,9 +321,9 @@ public class WechatMemberController extends BaseController {
         
         MemberDTO fromMemberDTO = memberService.checkMemberRegister(fromOpenId);
         if (null == fromMemberDTO) {
-        	result.setCode(ERROR_CODE);
-			result.setMessage("推荐人不正确");
-			return result;
+	        	MemberRecommendDTO memberRecommendDTO = memberRecommendService.find(openid);
+	        	fromOpenId = null == memberRecommendDTO ? "NB_ROOT_ADMIN" : memberRecommendDTO.getOpenId();
+	        	fromMemberDTO = memberService.checkMemberRegister(fromOpenId);
         }
         //检查推荐用户是否为根用户
         long groupId = 0;

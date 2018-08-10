@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ns.warlock.dto.MemberDTO;
+import com.ns.warlock.dto.MemberRecommendDTO;
 import com.ns.warlock.dto.WeixinTextMsg;
+import com.ns.warlock.service.MemberRecommendService;
 import com.ns.warlock.service.MemberService;
 import com.ns.warlock.util.WeixinMessageUtil;
 import com.ns.warlock.util.WeixinUtil;
@@ -37,6 +39,9 @@ public class WechatController extends BaseController {
 
 	@Resource(name = "memberServiceImpl")
 	private MemberService memberService;
+	
+	@Resource(name = "memberRecommendServiceImpl")
+	private MemberRecommendService memberRecommendService;
 
 	/**
 	 * 微信入口
@@ -85,30 +90,13 @@ public class WechatController extends BaseController {
 				String eventType = map.get("Event");
 				// 关注 和 扫码-未关注时扫码
 				if (WeixinMessageUtil.EVENT_SUB.equals(eventType)) {
-					String eventKey = map.get("EventKey");
-					if (StringUtils.isNotEmpty(eventKey) && eventKey.startsWith("qrscene_")) {
-						MemberDTO fromMemberDTO = memberService.checkMemberRegister(eventKey.replace("qrscene_", ""));
-						if (null != fromMemberDTO && null != fromMemberDTO.getOpenId()) {
-							message = new WeixinTextMsg("欢迎您通过'" + fromMemberDTO.getNickname() + "'的二维码关注我们",
-									fromUserName, toUserName).getXml();
-						} else {
-							message = new WeixinTextMsg("欢迎您通过二维码关注我们", fromUserName, toUserName).getXml();
-						}
-					} else {
-						message = new WeixinTextMsg("欢迎您关注我们", fromUserName, toUserName).getXml();
-					}
+					String msg = memberRecommend(fromUserName, map.get("EventKey"));
+					message = new WeixinTextMsg("欢迎您关注我们,"+msg, fromUserName, toUserName).getXml();
 				} else if (WeixinMessageUtil.EVENT_UNSUB.equals(eventType)) {
 					// 取消关注
 				} else if (WeixinMessageUtil.EVENT_SCAN.equals(eventType)) {
 					// 扫描带参数二维码-用户已关注时
-					String eventKey = map.get("EventKey");
-					MemberDTO fromMemberDTO = memberService.checkMemberRegister(eventKey.replace("qrscene_", ""));
-					if (null != fromMemberDTO && null != fromMemberDTO.getOpenId()) {
-						message = new WeixinTextMsg("您已成功扫码'" + fromMemberDTO.getNickname() + "'的二维码", fromUserName,
-								toUserName).getXml();
-					} else {
-						message = new WeixinTextMsg("欢迎您", fromUserName, toUserName).getXml();
-					}
+					message = new WeixinTextMsg(memberRecommend(fromUserName, map.get("EventKey")), fromUserName, toUserName).getXml();
 				}
 			} else if (WeixinMessageUtil.MESSAGE_IMAGE.equals(msgType)) { // 图片消息
 				// todo 处理图片消息
@@ -132,4 +120,21 @@ public class WechatController extends BaseController {
 		}
 	}
 
+	private String memberRecommend(String openid, String parentOpenid) {
+		if(StringUtils.isEmpty(parentOpenid)) {
+			return "";
+		}
+		parentOpenid = parentOpenid.replace("qrscene_", "");
+		MemberRecommendDTO recod = new MemberRecommendDTO();
+		recod.setOpenId(openid);
+		recod.setParentOpenId(parentOpenid);
+		memberRecommendService.insert(recod);
+		MemberRecommendDTO memberRecommendDTO = memberRecommendService.find(openid);
+		if (null != memberRecommendDTO) {
+			MemberDTO parentMemberDTO = memberService.checkMemberRegister(memberRecommendDTO.getParentOpenId());
+			return "对不起，您已经扫描了'"+parentMemberDTO.getNickname()+"'的二维码，<a href='http://www.baidu.com/'>点击链接注册吧</a>";
+		}
+		MemberDTO parentMemberDTO = memberService.checkMemberRegister(parentOpenid);
+		return "您已成功扫描'"+parentMemberDTO.getNickname()+"'的二维码，<a href='http://www.baidu.com/'>点击链接注册吧</a>";
+	}
 }

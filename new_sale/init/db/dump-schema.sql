@@ -373,5 +373,14 @@ CREATE TABLE `ns_order_item` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT '订单项表';
 
 
-
-
+-- -------------------------------------------
+-- Table structure for `ns_member_recommend`
+-- -------------------------------------------
+DROP TABLE IF EXISTS `ns_member_recommend`;
+CREATE TABLE `ns_member_recommend` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `openid` varchar(50) NOT NULL COMMENT '当前用户微信openid',
+  `parent_openid` varchar(30) DEFAULT NULL COMMENT '推荐用户的openId',
+  `create_date` datetime NOT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户推荐记录表';
