@@ -34,6 +34,8 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "微信接口")
 @CrossOrigin
 public class WechatController extends BaseController {
+	
+	public static String redicrtUrl = "http://www.baidu.com/";
 
 	public static Logger log = LoggerFactory.getLogger(WechatController.class);
 
@@ -124,17 +126,17 @@ public class WechatController extends BaseController {
 		if(StringUtils.isEmpty(parentOpenid)) {
 			return "";
 		}
+		MemberRecommendDTO memberRecommendDTO = memberRecommendService.find(openid);
 		parentOpenid = parentOpenid.replace("qrscene_", "");
 		MemberRecommendDTO recod = new MemberRecommendDTO();
 		recod.setOpenId(openid);
 		recod.setParentOpenId(parentOpenid);
 		memberRecommendService.insert(recod);
-		MemberRecommendDTO memberRecommendDTO = memberRecommendService.find(openid);
 		if (null != memberRecommendDTO) {
 			MemberDTO parentMemberDTO = memberService.checkMemberRegister(memberRecommendDTO.getParentOpenId());
-			return "对不起，您已经扫描了'"+parentMemberDTO.getNickname()+"'的二维码，<a href='http://www.baidu.com/'>点击链接注册吧</a>";
+			return "对不起，您已经扫描了'"+parentMemberDTO.getNickname()+"'的二维码，<a href='"+redicrtUrl+"'>点击链接注册吧</a>";
 		}
 		MemberDTO parentMemberDTO = memberService.checkMemberRegister(parentOpenid);
-		return "您已成功扫描'"+parentMemberDTO.getNickname()+"'的二维码，<a href='http://www.baidu.com/'>点击链接注册吧</a>";
+		return "您已成功扫描'"+parentMemberDTO.getNickname()+"'的二维码，<a href='"+redicrtUrl+"'>点击链接注册吧</a>";
 	}
 }

@@ -382,5 +382,7 @@ CREATE TABLE `ns_member_recommend` (
   `openid` varchar(50) NOT NULL COMMENT '当前用户微信openid',
   `parent_openid` varchar(30) DEFAULT NULL COMMENT '推荐用户的openId',
   `create_date` datetime NOT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`)
+  `update_date` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_openid_parentOpenid` (`openid`,`parent_openid`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户推荐记录表';

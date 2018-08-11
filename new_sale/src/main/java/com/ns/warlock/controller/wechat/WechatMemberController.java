@@ -322,7 +322,7 @@ public class WechatMemberController extends BaseController {
         MemberDTO fromMemberDTO = memberService.checkMemberRegister(fromOpenId);
         if (null == fromMemberDTO) {
 	        	MemberRecommendDTO memberRecommendDTO = memberRecommendService.find(openid);
-	        	fromOpenId = null == memberRecommendDTO ? "NB_ROOT_ADMIN" : memberRecommendDTO.getOpenId();
+	        	fromOpenId = null == memberRecommendDTO ? "NB_ROOT_ADMIN" : memberRecommendDTO.getParentOpenId();
 	        	fromMemberDTO = memberService.checkMemberRegister(fromOpenId);
         }
         //检查推荐用户是否为根用户

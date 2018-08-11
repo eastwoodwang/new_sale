@@ -7,10 +7,11 @@
         <result property="openId" column="openid"/>
         <result property="parentOpenId" column="parent_openid" />
         <result property="createDate" column="create_date" />
+        <result property="updateDate" column="update_date" />
     </resultMap>
 
 	<sql id="Base_Column_List" >
-	    id, openid, parent_openid, create_date
+	    id, openid, parent_openid, create_date, update_date
   	</sql>
 
     <select id="findAll" resultMap="memberRecommendMap" parameterType="java.lang.String">
@@ -30,6 +31,7 @@
     </select>
 
     <insert id="insert" parameterType="com.ns.warlock.dto.MemberRecommendDTO" >
-        insert into ns_member_recommend (openid, parent_id, create_date) values (#{openId}, #{parentOpenId}, NOW())
+        insert into ns_member_recommend (openid, parent_openid, create_date) 
+        values (#{openId}, #{parentOpenId}, NOW()) ON DUPLICATE KEY UPDATE update_date=NOW()
     </insert>
 </mapper>
