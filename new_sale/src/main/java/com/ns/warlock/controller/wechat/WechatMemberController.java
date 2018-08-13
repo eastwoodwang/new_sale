@@ -8,7 +8,7 @@ import com.ns.warlock.dto.MemberAddressDTO;
 import com.ns.warlock.dto.MemberDTO;
 import com.ns.warlock.dto.MemberRecommendDTO;
 import com.ns.warlock.service.*;
-import com.ns.warlock.util.WeixinUtil;
+import com.ns.warlock.util.WechatUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,7 +17,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.shiro.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -196,7 +195,7 @@ public class WechatMemberController extends BaseController {
 
             registerMemberDTO = new MemberDTO();
             registerMemberDTO.setOpenId(openid);
-            registerMemberDTO.setQrCodeUrl(WeixinUtil.getQrCodeUrl(openid));
+            registerMemberDTO.setQrCodeUrl(WechatUtil.getQrCodeUrl(openid));
 
             if (!StringUtils.isEmpty(nickname)) {
                 registerMemberDTO.setNickname(nickname);
@@ -278,7 +277,7 @@ public class WechatMemberController extends BaseController {
     		@ApiParam(required = false, name = "fromOpenId", value = "推荐人openID")@RequestParam(required = false) String fromOpenId) {
     	log.info("fromOpenId:"+fromOpenId);
         Result result = new Result();
-        JSONObject jsonObject = WeixinUtil.getOpenIdMap(code);
+        JSONObject jsonObject = WechatUtil.getOpenIdMap(code);
 		if (null == jsonObject || StringUtils.isEmpty(jsonObject.getString("openid"))) {
 			result.setCode(ERROR_CODE);
 			result.setMessage("微信获取信息失败:"+jsonObject);
@@ -293,7 +292,7 @@ public class WechatMemberController extends BaseController {
             result.setData(registerMemberDTO);
             return result;
         }
-		jsonObject = WeixinUtil.getUserInfoMap(jsonObject.getString("access_token"), openid);
+		jsonObject = WechatUtil.getUserInfoMap(jsonObject.getString("access_token"), openid);
 		if (null == jsonObject || StringUtils.isEmpty(jsonObject.getString("openid"))) {
 			result.setCode(ERROR_CODE);
 			result.setMessage("微信拉取信息失败:"+jsonObject);
@@ -360,7 +359,7 @@ public class WechatMemberController extends BaseController {
         registerMemberDTO.setMemberLevel(memberLevelService.findInitLevel());
         registerMemberDTO.setOwnerCoast(new BigDecimal(0));
         registerMemberDTO.setLeafCoast(new BigDecimal(0));
-        registerMemberDTO.setQrCodeUrl(WeixinUtil.getQrCodeUrl(openid));
+        registerMemberDTO.setQrCodeUrl(WechatUtil.getQrCodeUrl(openid));
         //创建用户
         memberService.insert(registerMemberDTO);
         result.setCode(SUCCESS_CODE);

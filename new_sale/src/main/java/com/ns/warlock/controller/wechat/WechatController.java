@@ -24,7 +24,7 @@ import com.ns.warlock.dto.WeixinTextMsg;
 import com.ns.warlock.service.MemberRecommendService;
 import com.ns.warlock.service.MemberService;
 import com.ns.warlock.util.WeixinMessageUtil;
-import com.ns.warlock.util.WeixinUtil;
+import com.ns.warlock.util.WechatUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,8 +34,9 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "微信接口")
 @CrossOrigin
 public class WechatController extends BaseController {
-	
-	public static String redicrtUrl = "http://www.baidu.com/";
+
+	/** 回调路径需要修改 */
+	public static String redirectURL = "http://www.baidu.com/";
 
 	public static Logger log = LoggerFactory.getLogger(WechatController.class);
 
@@ -59,7 +60,7 @@ public class WechatController extends BaseController {
 		String timestamp = request.getParameter("timestamp");
 		String nonce = request.getParameter("nonce");
 		String echostr = request.getParameter("echostr");
-		if (WeixinUtil.checkSignature(signature, timestamp, nonce)) {
+		if (WechatUtil.checkSignature(signature, timestamp, nonce)) {
 			response.getWriter().print(echostr);
 		}
 	}
@@ -134,9 +135,15 @@ public class WechatController extends BaseController {
 		memberRecommendService.insert(recod);
 		if (null != memberRecommendDTO) {
 			MemberDTO parentMemberDTO = memberService.checkMemberRegister(memberRecommendDTO.getParentOpenId());
-			return "对不起，您已经扫描了'"+parentMemberDTO.getNickname()+"'的二维码，<a href='"+redicrtUrl+"'>点击链接注册吧</a>";
+			return "对不起，您已经扫描了'"+parentMemberDTO.getNickname()+"'的二维码，<a href='"+redirectURL+"'>点击链接注册吧</a>";
 		}
 		MemberDTO parentMemberDTO = memberService.checkMemberRegister(parentOpenid);
-		return "您已成功扫描'"+parentMemberDTO.getNickname()+"'的二维码，<a href='"+redicrtUrl+"'>点击链接注册吧</a>";
+		return "您已成功扫描'"+parentMemberDTO.getNickname()+"'的二维码，<a href='"+redirectURL+"'>点击链接注册吧</a>";
 	}
+
+
+	/**
+	 * 需要增加三个方法支持微信前端的调用：https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1421140842
+	 */
+
 }

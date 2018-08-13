@@ -34,9 +34,9 @@ import com.ns.warlock.dto.AccessToken;
  * @version 1.0
  * 
  */
-public class WeixinUtil {
+public class WechatUtil {
 
-	public static Logger log = LoggerFactory.getLogger(WeixinUtil.class);
+	public static Logger log = LoggerFactory.getLogger(WechatUtil.class);
 	private static Map<String, AccessToken> tokenMap = new HashMap<String, AccessToken>();
 	/**
 	 * 获取access_token的接口地址（GET） 限200（次/天）
